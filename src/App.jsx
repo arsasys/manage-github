@@ -27,10 +27,10 @@ function App() {
         <Footer className="app-footer">
           <Space>
             <span>GitHub文件管理器 ©{new Date().getFullYear()} Created with React</span>
-            <Typography.Link href="https://github.com/arsasys/manage-github" target="_blank" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
+            <Typography.Link href="https://github.com/arsasys/manage-github" target="_blank" style={{ color: 'rgba(170,170,170,1)' }}>
               <GithubOutlined /> 项目仓库
             </Typography.Link>
-            <Typography.Link href="https://sysblog.cc" target="_blank" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
+            <Typography.Link href="https://blog.3my.top" target="_blank" style={{ color: 'rgba(170,170,170,1)' }}>
               <GlobalOutlined /> SYS博客
             </Typography.Link>
           </Space>
