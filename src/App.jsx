@@ -1,7 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout, ConfigProvider } from 'antd';
+import { Layout, ConfigProvider, Space, Typography } from 'antd';
 import zhCN from 'antd/lib/locale/zh_CN';
+import { GithubOutlined, GlobalOutlined } from '@ant-design/icons';
 
 import AppHeader from './components/AppHeader';
 import Config from './pages/Config';
