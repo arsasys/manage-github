@@ -15,7 +15,7 @@ function App() {
       <Layout className="layout" style={{ minHeight: '100vh' }}>
         <AppHeader />
         <Content className="container">
-          <div className="site-layout-content">
+          <div className="site-layout-content fade-in">
             <Routes>
               <Route path="/config" element={<Config />} />
               <Route path="/files" element={<FileManager />} />
@@ -23,7 +23,7 @@ function App() {
             </Routes>
           </div>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
+        <Footer className="app-footer">
           GitHub文件管理器 ©{new Date().getFullYear()} Created with React
         </Footer>
       </Layout>
