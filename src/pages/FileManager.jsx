@@ -275,7 +275,7 @@ function FileManager() {
   // 渲染面包屑导航
   const renderBreadcrumb = () => {
     return (
-      <Breadcrumb style={{ marginBottom: 16 }}>
+      <Breadcrumb className="breadcrumb-container">
         <Breadcrumb.Item>
           <a onClick={() => fetchFiles('')}>根目录</a>
         </Breadcrumb.Item>
@@ -289,22 +289,24 @@ function FileManager() {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
+    <div className="file-manager-container fade-in">
+      <div>
         {renderBreadcrumb()}
       </div>
       
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-        <Space>
+      <div className="file-manager-header">
+        <div className="file-manager-actions">
           {pathHistory.length > 0 && (
             <Button onClick={goToParentDirectory}>
               返回上一级
             </Button>
           )}
           <Upload {...uploadProps}>
-            <Button icon={<UploadOutlined />}>上传文件</Button>
+            <Button icon={<UploadOutlined />} type="primary">
+              上传文件
+            </Button>
           </Upload>
-        </Space>
+        </div>
         
         <Button onClick={() => fetchFiles(currentPath)} type="primary">
           刷新
@@ -313,6 +315,7 @@ function FileManager() {
       
       <Spin spinning={loading}>
         <Table 
+          className="file-table"
           columns={columns} 
           dataSource={files} 
           rowKey="path"
