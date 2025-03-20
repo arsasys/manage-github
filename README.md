@@ -1,6 +1,7 @@
 # GitHub文件管理器
 
 基于React + Ant Design构建的GitHub仓库文件管理工具，提供可视化配置管理和文件操作功能。
+![](https://cdn.jsdelivr.net/gh/arsasys/img/blog/20250320203904233.png)
 
 ## 主要功能
 
