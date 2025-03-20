@@ -42,7 +42,7 @@ function Config() {
   };
 
   return (
-    <Card title="GitHub配置" style={{ maxWidth: 600, margin: '0 auto' }}>
+    <Card title="GitHub配置" className="config-card fade-in">
       <Form
         form={form}
         layout="vertical"
