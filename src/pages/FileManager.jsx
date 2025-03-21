@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Upload, message, Breadcrumb, Modal, Space, Spin } from 'antd';
-import { UploadOutlined, FolderOutlined, FileOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Button, Upload, message, Breadcrumb, Modal, Space, Spin, Input, Form } from 'antd';
+import { UploadOutlined, FolderOutlined, FileOutlined, DeleteOutlined, ExclamationCircleOutlined, FolderAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,6 +13,8 @@ function FileManager() {
   const [currentPath, setCurrentPath] = useState('');
   const [pathHistory, setPathHistory] = useState([]);
   const [config, setConfig] = useState(null);
+  const [createFolderVisible, setCreateFolderVisible] = useState(false);
+  const [folderName, setFolderName] = useState('');
 
   useEffect(() => {
     // 从localStorage加载配置
@@ -35,8 +37,8 @@ function FileManager() {
       const { token, owner, repo } = config;
       // 如果是根目录，直接获取仓库内容
       const url = path
-        ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
-        : `https://api.github.com/repos/${owner}/${repo}/contents`;
+        ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${config.branch || 'main'}`
+        : `https://api.github.com/repos/${owner}/${repo}/contents?ref=${config.branch || 'main'}`;
 
       const response = await axios.get(url, {
         headers: {
@@ -123,6 +125,7 @@ function FileManager() {
             data: {
               message: `Delete ${file.name}`,
               sha: file.sha,
+              branch: config.branch || 'main',
             },
           });
           message.success('文件删除成功');
@@ -136,6 +139,54 @@ function FileManager() {
     });
   };
 
+  // 创建文件夹
+  const createFolder = async () => {
+    if (!config) {
+      message.error('请先配置GitHub信息');
+      return;
+    }
+    
+    if (!folderName.trim()) {
+      message.error('文件夹名称不能为空');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { token, owner, repo } = config;
+      
+      // 构建文件路径 (.gitkeep文件用于创建空文件夹)
+      const folderPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+      const filePath = `${folderPath}/.gitkeep`;
+      
+      // 创建一个空的.gitkeep文件
+      const content = ''; // 空内容
+      const encodedContent = btoa(content); // Base64编码
+      
+      await axios.put(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+        message: `Create folder ${folderName}`,
+        content: encodedContent,
+        branch: config.branch || 'main',
+      }, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+      });
+      
+      message.success('文件夹创建成功');
+      setCreateFolderVisible(false);
+      setFolderName('');
+      // 刷新文件列表
+      fetchFiles(currentPath);
+    } catch (error) {
+      console.error('创建文件夹失败:', error);
+      message.error('创建文件夹失败: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // 上传文件
   const uploadProps = {
     name: 'file',
@@ -162,7 +213,7 @@ function FileManager() {
             // 检查文件是否已存在
             let existingSha = null;
             try {
-              const checkResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
+              const checkResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${config.branch || 'main'}`, {
                 headers: {
                   Authorization: `token ${token}`,
                   Accept: 'application/vnd.github.v3+json',
@@ -177,6 +228,7 @@ function FileManager() {
             const uploadData = {
               message: `Upload ${file.name}`,
               content,
+              branch: config.branch || 'main',
             };
             
             // 如果文件已存在，添加sha以更新文件
@@ -301,6 +353,14 @@ function FileManager() {
               返回上一级
             </Button>
           )}
+          <Button 
+            icon={<FolderAddOutlined />} 
+            type="primary"
+            onClick={() => setCreateFolderVisible(true)}
+            style={{ marginRight: 8 }}
+          >
+            新建文件夹
+          </Button>
           <Upload {...uploadProps}>
             <Button icon={<UploadOutlined />} type="primary">
               上传文件
@@ -322,6 +382,34 @@ function FileManager() {
           pagination={files.length > 10 ? { pageSize: 10 } : false}
         />
       </Spin>
+      
+      {/* 创建文件夹模态框 */}
+      <Modal
+        title="新建文件夹"
+        open={createFolderVisible}
+        onOk={createFolder}
+        onCancel={() => {
+          setCreateFolderVisible(false);
+          setFolderName('');
+        }}
+        okText="创建"
+        cancelText="取消"
+      >
+        <Form layout="vertical">
+          <Form.Item
+            label="文件夹名称"
+            required
+            tooltip="GitHub不支持创建空文件夹，将会在文件夹中创建一个.gitkeep文件"
+          >
+            <Input 
+              placeholder="请输入文件夹名称" 
+              value={folderName}
+              onChange={(e) => setFolderName(e.target.value)}
+              autoFocus
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
